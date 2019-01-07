@@ -2,18 +2,26 @@
 private class SendSurveySchedulerTest {
 	 static testmethod void schedulerTest()
     {
-        String CRON_EXP='0 35 11 * * ?';
-        //create test data
-        contact con = new contact();
-        con.FirstName='N26 customer';
-        con.LastName='ABCD';
-        con.Languages__c = 'EN';
-        con.Survey_Date__c = date.today();
-        con.Email='vinodjakore@gmail.com';
-        insert con;
+        String CRON_EXP='0 18 1 * * ?';
+	//Create test data for customer 1 with EN language
+        contact con_en = new contact();
+        con_en.FirstName='N26 customer1';
+        con_en.LastName='ABCD';
+        con_en.Languages__c = 'EN';
+        con_en.Survey_Date__c = date.today();
+        con_en.Email='vinodjakore@gmail.com';
+        insert con_en;
+	//Create test data for customer 2 with DE language
+        contact con_de = new contact();
+        con_de.FirstName='N26 customer2';
+        con_de.LastName='ABCDEF';
+        con_de.Languages__c = 'DE';
+        con_de.Survey_Date__c = date.today();
+        con_de.Email='vinodjakore@gmail.com';
+        insert con_de;
         
         Test.startTest();
-        String jobId= system.schedule('Send Survey EMail', CRON_EXP, new SendSurveyScheduler());
+        String jobId= system.schedule('Send Survey EMail', CRON_EXP, new SendSurveyEmailScheduler());
         CronTrigger ct = [SELECT Id,CronExpression,TimesTriggered,NextFireTime FROM CronTrigger WHERE Id=:jobId];
         System.assertEquals(CRON_EXP,ct.CronExpression);
         System.assertEquals(0,ct.TimesTriggered);
