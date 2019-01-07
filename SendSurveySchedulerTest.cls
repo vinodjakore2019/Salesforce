@@ -1,5 +1,11 @@
+/**
+* @author Vinod Jakore
+* @date 07/01/2019
+* @description SendSurveyEmailSchedulerTest is test class to test the code of SendSurveyEmail and SendSurveyEmailScheduler classes.
+*/
+
 @isTest
-private class SendSurveySchedulerTest {
+private class SendSurveyEmailSchedulerTest {
 	 static testmethod void schedulerTest()
     {
         String CRON_EXP='0 18 1 * * ?';
