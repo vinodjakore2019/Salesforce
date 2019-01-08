@@ -3,8 +3,11 @@
 * @date 07/01/2019
 * @description SendSurveyEmail batch class search for the contacts with survey date less than equals to todays date and sends Email to contact email Id depends upon Language mentioned in contact
 */
-
+        
 global class SendSurveyEmail implements Database.Batchable<sObject> {
+
+    global List<String> errorMessages = new List<String>();
+
     global Database.QueryLocator start(Database.BatchableContext Bc){
         String query = 'Select Id,FirstName,Languages__c,Survey_Date__c,Email FROM Contact WHERE Survey_Date__c <= TODAY';
         return Database.getQueryLocator(query);
@@ -42,10 +45,29 @@ global class SendSurveyEmail implements Database.Batchable<sObject> {
            //Once the email is ready to send to contact then make Survey Date field as null.
            con.Survey_Date__c = null;
     }
-        Messaging.sendEmail(mails);
+        
+        if(!mails.isEmpty()) {
+                try{
+                    Messaging.sendEmail(mails);
+                }
+                catch (Exception ex) {
+                    errorMessages.add('Unable to send email to : '+ ex.getStackTraceString());
+                }
+        }
         update scope;
     }
     global void finish(Database.BatchableContext Bc){
-        
+    	AsyncApexJob aaj = [Select Id, Status, NumberOfErrors, JobItemsProcessed, MethodName, TotalJobItems, CreatedBy.Email from AsyncApexJob 
+	    where Id =:BC.getJobId()];
+        // Send an email to the Send Survey Email job submitter notifying of job completion.
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        String[] toAddresses = new String[] {aaj.CreatedBy.Email};
+        mail.setToAddresses(toAddresses);
+        mail.setSubject('Send Survey Email JOB Salesforce Send Notification Batch: ' + aaj.Status);
+        String bodyText='Total Job Items ' + aaj.TotalJobItems + ' Number of records processed ' + aaj.JobItemsProcessed + ' with '+ aaj.NumberOfErrors + ' failures.\n';
+        bodyText += 'Number of Error Messages ' + errorMessages.size() + '\n';
+        bodyText += 'Error Message' + String.join(errorMessages, '\n');
+        mail.setPlainTextBody(bodyText);
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
     }
 }
