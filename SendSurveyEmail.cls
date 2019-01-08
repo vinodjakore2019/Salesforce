@@ -16,22 +16,22 @@ global class SendSurveyEmail implements Database.Batchable<sObject> {
            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
            String[] sendingTo = new String[]{con.Email};
     	   mail.setToAddresses(sendingTo);
-           
+           mail.setTargetObjectId(con.Id);
+      			
            //Check if language of the contact is English then send the email in English language
            if(con.Languages__c=='EN' || con.Languages__c=='en'){
                	mail.setSubject('Please fill out our survey');
                	String body = 'Hey ' + con.FirstName + ',<br/>';
-      			body += 'Please fill out our survey: http://n26.com/survey/' + con.id + '<br/>';
+      			body += 'Please fill out our survey: http://n26.com/survey/' + con.id + '<br/><br/>';
                 body += 'Mit freundlichen grüßen / Kind Regards,<br/>';
                 body += 'N26 bank <br/>';
-                mail.setTargetObjectId(userinfo.getUserId());
-      			mail.setHtmlBody(body);
+                mail.setHtmlBody(body);
                 mails.add(mail);
                //Check if language of the contact is English then send the email in English language
            }else if(con.Languages__c=='DE'|| con.Languages__c=='de'){
                mail.setSubject('Bitte füllen Sie unsere Umfrage aus');
                String body = 'Hey ' + con.FirstName + ',<br/>';
-      		   body += 'Bitte füllen Sie unsere Umfrage aus: http://n26.com/survey/' + con.Id + '<br/>';
+      		   body += 'Bitte füllen Sie unsere Umfrage aus: http://n26.com/survey/' + con.Id + '<br/><br/>';
                body += 'Mit freundlichen grüßen / Kind Regards,<br/>';
                body += 'N26 bank <br/>';
                mail.setHtmlBody(body);
